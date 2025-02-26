@@ -1,0 +1,28 @@
+[tool.poetry]
+package-mode = false
+
+[project]
+name = "fake-faces-detection"
+version = "0.1.0"
+description = "AIP-2025"
+authors = [
+    {name = "Duong Khoa Lam",email = "lamdkhe160283@fpt.edu.vn"},
+    {name = "An Thanh Long",email = "longathe163044@fpt.edu.vn"},
+    {name = "Trinh Minh Hung",email = "hungtmhe151170@fpt.edu.vn"},
+    {name = "Nguyen Dinh Dung",email = "dungndhe151265@fpt.edu.vn"},
+]
+
+readme = "README.md"
+requires-python = ">=3.13,<4.0"
+dependencies = [
+    "torch (>=2.6.0,<3.0.0)",
+    "torchvision (>=0.21.0,<0.22.0)",
+    "tqdm (>=4.67.1,<5.0.0)",
+    "python-dotenv (>=1.0.1,<2.0.0)",
+    "loguru (>=0.7.3,<0.8.0)"
+]
+license = { text = "MIT" }
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
