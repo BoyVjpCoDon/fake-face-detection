@@ -6,22 +6,22 @@ from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 from tqdm import tqdm
 
-def init_model_efficientnet_v2_s(trainable_extractor = False):
+def init_model_ResNet50(trainable_extractor = False):
     """
-    Create an EfficientNetV2-S model.
+    Create an ResNet50 model.
 
     Returns:
-        model (torch.nn.Module): EfficientNetV2-S model.
+        model (torch.nn.Module): ResNet50 model.
     """
-    weights = torchvision.models.EfficientNet_V2_S_Weights.DEFAULT
-    model = torchvision.models.efficientnet_v2_s(weights=weights).to(device)
+    weights = torchvision.models.ResNet50_Weights.DEFAULT
+    model = torchvision.models.resnet50(weights=weights).to(device)
     
     # Freeze all layers
     for param in model.parameters():
         param.requires_grad = trainable_extractor
     
-    model.classifier= nn.Sequential(
-    torch.nn.Linear(1280,1000),
+    model.fc= nn.Sequential(
+    torch.nn.Linear(2048,1000),
     torch.nn.ReLU(),
     torch.nn.Linear(1000,500),
     torch.nn.Dropout(),
@@ -147,9 +147,12 @@ def train(model: torch.nn.Module,
         "test_acc": []
     }
     
-    model_state_dict, optimizer_state_dict, start_epoch = load_checkpoint(pretrained)
-    model.load_state_dict(model_state_dict)
-    optimizer.load_state_dict(optimizer_state_dict)
+    if pretrained:
+        model_state_dict, optimizer_state_dict, start_epoch = load_checkpoint(pretrained)
+        model.load_state_dict(model_state_dict)
+        optimizer.load_state_dict(optimizer_state_dict)
+    else:
+        start_epoch = 0
     # 3. Loop through training and testing steps for a number of epochs
     for epoch in range(start_epoch+1, start_epoch + epochs):
         print("Epoch:",epoch)
@@ -212,15 +215,15 @@ if __name__ == "__main__":
     valid_dir="archive/dataset/valid"
     test_dir="archive/dataset/test"
 
-    model = init_model_efficientnet_v2_s()
+    model = init_model_ResNet50()
     # Train
-    batch_size = 16
+    batch_size = 64
     train_dataloader, test_dataloader = load_data(train_dir, valid_dir, batch_size)
 
     train(model=model,
           train_dataloader=train_dataloader,
           test_dataloader=test_dataloader,
           optimizer=torch.optim.Adam(model.parameters(), lr=0.001),
-          checkpoint_model_name="EfficientNetV2_S",
-          epochs=5,
-          pretrained="checkpoints/EfficientNetV2_S_epoch_2.pth")
+          checkpoint_model_name="ResNet50",
+          epochs=10,
+          pretrained="")
