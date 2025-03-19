@@ -1,3 +1,4 @@
+from matplotlib import pyplot as plt
 import torch
 from torch import nn
 import torchvision
@@ -147,9 +148,17 @@ def train(model: torch.nn.Module,
         "test_acc": []
     }
     
-    model_state_dict, optimizer_state_dict, start_epoch = load_checkpoint(pretrained)
-    model.load_state_dict(model_state_dict)
-    optimizer.load_state_dict(optimizer_state_dict)
+    if pretrained:
+        model_state_dict, optimizer_state_dict, start_epoch = load_checkpoint(pretrained)
+        model.load_state_dict(model_state_dict)
+        optimizer.load_state_dict(optimizer_state_dict)
+    else:
+        start_epoch = 0
+
+    # Initialize plot
+    plt.ion()
+    fig, ax = plt.subplots(2, 1, figsize=(10, 8))
+    
     # 3. Loop through training and testing steps for a number of epochs
     for epoch in range(start_epoch+1, start_epoch + epochs):
         print("Epoch:",epoch)
@@ -187,6 +196,25 @@ def train(model: torch.nn.Module,
         }
         torch.save(checkpoint, f"checkpoints/{checkpoint_model_name}_epoch_{epoch}.pth")
         
+                # Update plot
+        ax[0].cla()
+        ax[0].plot(range(1, epoch + 1), results["train_loss"], label="Train Loss")
+        ax[0].plot(range(1, epoch + 1), results["test_loss"], label="Test Loss")
+        ax[0].set_xlabel("Epoch")
+        ax[0].set_ylabel("Loss")
+        ax[0].legend()
+
+        ax[1].cla()
+        ax[1].plot(range(1, epoch + 1), results["train_acc"], label="Train Accuracy")
+        ax[1].plot(range(1, epoch + 1), results["test_acc"], label="Test Accuracy")
+        ax[1].set_xlabel("Epoch")
+        ax[1].set_ylabel("Accuracy")
+        ax[1].legend()
+
+        plt.pause(0.1)
+
+        plt.ioff()
+        plt.show()
     # 7. Return the filled results at the end of the epochs
     return results
 
