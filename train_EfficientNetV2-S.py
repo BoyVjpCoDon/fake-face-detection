@@ -219,13 +219,13 @@ if __name__ == "__main__":
 
     model = init_model_efficientnet_v2_s()
     # Train
-    batch_size = 16
+    batch_size = 128
     train_dataloader, test_dataloader = load_data(train_dir, valid_dir, batch_size)
 
     train(model=model,
           train_dataloader=train_dataloader,
           test_dataloader=test_dataloader,
-          optimizer=torch.optim.Adam(model.parameters(), lr=0.001),
+          optimizer=torch.optim.Adam(model.parameters(), lr=0.0005),
           checkpoint_model_name="EfficientNetV2_S",
-          epochs=5,
-          pretrained="checkpoints/EfficientNetV2_S_epoch_2.pth")
+          epochs=50,
+          pretrained="checkpoints/EfficientNetV2_S_epoch_7.pth")
