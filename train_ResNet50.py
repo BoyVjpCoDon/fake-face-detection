@@ -188,7 +188,7 @@ def train(model: torch.nn.Module,
             'test_loss': test_loss,
             'test_acc': test_acc
         }
-        torch.save(checkpoint, f"checkpoints/{checkpoint_model_name}_epoch_{epoch}.pth")
+        torch.save(checkpoint, f"checkpoints/{checkpoint_model_name}_epoch_{epoch:02d}.pth")
         
     # 7. Return the filled results at the end of the epochs
     return results
