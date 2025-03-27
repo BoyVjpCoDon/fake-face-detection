@@ -251,6 +251,6 @@ if __name__ == "__main__":
           train_dataloader=train_dataloader,
           test_dataloader=test_dataloader,
           optimizer=torch.optim.Adam(model.parameters(), lr=0.001),
-          checkpoint_model_name="ResNet50",
+          checkpoint_model_name="ResNet50ViT",
           epochs=10,
           pretrained="")
