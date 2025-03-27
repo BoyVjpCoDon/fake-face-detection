@@ -31,7 +31,13 @@ class ResNet50ViT(nn.Module):
         )
 
         # Fully connected layer for classification
-        self.fc = nn.Linear(768, num_classes)
+        self.fc = nn.Sequential(
+            nn.Linear(768, 512),
+            nn.ReLU(),
+            nn.Dropout(0.3), 
+            nn.Linear(512, num_classes)
+        )
+
 
     def forward(self, x):
         # ResNet50 feature extraction
