@@ -11,6 +11,10 @@ class ResNet50ViT(nn.Module):
         super(ResNet50ViT, self).__init__()
         # Load pre-trained ResNet50
         resnet50 = torchvision.models.resnet50(weights=torchvision.models.ResNet50_Weights.DEFAULT)
+        #freeze all layers
+        for param in resnet50.parameters():
+            param.requires_grad = False
+    
         self.resnet50 = nn.Sequential(*list(resnet50.children())[:-2])  # Remove the fully connected layer
 
         # Conv2D to reduce ResNet50 output channels to match ViT embedding size
