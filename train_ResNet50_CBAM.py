@@ -53,7 +53,7 @@ class CBAM(nn.Module):
 class BottleneckWithCBAM(torchvision.models.resnet.Bottleneck):
     def __init__(self, inplanes, planes, stride=1, downsample=None):
         super(BottleneckWithCBAM, self).__init__(inplanes, planes, stride, downsample)
-        self.cbam = None
+        self.cbam = CBAM(planes * self.expansion)
         self.planes = planes
 
     def forward(self, x):
@@ -69,16 +69,12 @@ class BottleneckWithCBAM(torchvision.models.resnet.Bottleneck):
         out = self.conv3(out)
         out = self.bn3(out)
 
+        out = self.cbam(out)
+
         if self.downsample is not None:
             residual = self.downsample(x)
-
         out += residual
         out = self.relu(out)
-
-        if self.cbam is None:
-            self.cbam = CBAM(out.shape[1]).to(x.device)
-
-        out = self.cbam(out)
         return out
 
 def init_model_ResNet50_CBAM(trainable_extractor = False, device='cuda'):
@@ -116,6 +112,7 @@ def init_model_ResNet50_CBAM(trainable_extractor = False, device='cuda'):
                         bias=True)
     )
     # Chuyển toàn bộ model lên device sau khi đã thực hiện các thay đổi
+    device = "cuda" if torch.cuda.is_available() else "cpu"
     model = model.to(device)
     # model.fc = model.fc.to(device) # Đảm bảo cả lớp fc cũng được chuyển
 
@@ -302,15 +299,23 @@ if __name__ == "__main__":
     valid_dir="archive/dataset/valid"
     test_dir="archive/dataset/test"
 
-    model = init_model_ResNet50_CBAM()
+    model = init_model_ResNet50_CBAM(True)
+
+    weight = torchvision.models.ResNet50_Weights.DEFAULT
+    model.load_state_dict(weight.get_state_dict(progress=True), strict=False)
+
+    for name, param in model.named_parameters():
+        if name in weight.get_state_dict():
+            param.requires_grad = False
+            
     # Train
-    batch_size = 32
+    batch_size = 16
     train_dataloader, test_dataloader = load_data(train_dir, valid_dir, batch_size)
 
     train(model=model,
           train_dataloader=train_dataloader,
           test_dataloader=test_dataloader,
           optimizer=torch.optim.Adam(model.parameters(), lr=0.001),
-          checkpoint_model_name="ResNet50",
+          checkpoint_model_name="ResNet50_CBAM",
           epochs=10,
           pretrained="")
