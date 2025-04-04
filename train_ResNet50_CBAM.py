@@ -116,7 +116,6 @@ def init_model_ResNet50_CBAM(trainable_extractor = False, device='cuda'):
                         bias=True)
     )
     # Chuyển toàn bộ model lên device sau khi đã thực hiện các thay đổi
-    device = "cpu"
     model = model.to(device)
     # model.fc = model.fc.to(device) # Đảm bảo cả lớp fc cũng được chuyển
 
