@@ -20,36 +20,45 @@ class h_swish(nn.Module):
     def forward(self, x):
         return x * self.sigmoid(x)
 
+class swish(nn.Module):
+    def forward(self, x):
+        return x * torch.sigmoid(x)
+    
 class CoordAtt(nn.Module):
-    def __init__(self, inp, oup, reduction=32):
+    def __init__(self, inp, oup, groups=32):
         super(CoordAtt, self).__init__()
-        self.pool_h = nn.AdaptiveAvgPool2d((1, None))
-        self.pool_w = nn.AdaptiveAvgPool2d((None, 1))
+        self.pool_h = nn.AdaptiveAvgPool2d((None, 1))
+        self.pool_w = nn.AdaptiveAvgPool2d((1, None))
 
-        mip = max(8, inp // reduction)
+        mip = max(8, inp // groups)
 
         self.conv1 = nn.Conv2d(inp, mip, kernel_size=1, stride=1, padding=0)
         self.bn1 = nn.BatchNorm2d(mip)
-        self.act = h_swish()
-        self.conv_h = nn.Conv2d(mip, oup, kernel_size=1, stride=1, padding=0)
-        self.conv_w = nn.Conv2d(mip, oup, kernel_size=1, stride=1, padding=0)
+        self.conv2 = nn.Conv2d(mip, oup, kernel_size=1, stride=1, padding=0)
+        self.conv3 = nn.Conv2d(mip, oup, kernel_size=1, stride=1, padding=0)
+        self.relu = h_swish()
 
     def forward(self, x):
-        n, c, h, w = x.size()
+        identity = x
+        n,c,h,w = x.size()
         x_h = self.pool_h(x)
         x_w = self.pool_w(x).permute(0, 1, 3, 2)
 
-        x_cat = torch.cat((x_h, x_w), dim=2)
+        y = torch.cat([x_h, x_w], dim=2)
+        y = self.conv1(y)
+        y = self.bn1(y)
+        y = self.relu(y) 
+        x_h, x_w = torch.split(y, [h, w], dim=2)
+        x_w = x_w.permute(0, 1, 3, 2)
 
-        x_cat = self.conv1(x_cat)
-        x_cat = self.bn1(x_cat)
-        x_cat = self.act(x_cat)
+        x_h = self.conv2(x_h).sigmoid()
+        x_w = self.conv3(x_w).sigmoid()
+        x_h = x_h.expand(-1, -1, h, w)
+        x_w = x_w.expand(-1, -1, h, w)
 
-        x_h = self.conv_h(x_cat[:, :, 0:1, :])
-        x_w = self.conv_w(x_cat[:, :, 1:2, :]).permute(0, 1, 3, 2)
+        y = identity * x_w * x_h
 
-        out = x_h * x_w
-        return out
+        return y
 
 class BottleneckWithCA(Bottleneck):
     def __init__(self, *args, **kwargs):
@@ -69,7 +78,7 @@ class BottleneckWithCA(Bottleneck):
 
         out = self.conv3(out)
         out = self.bn3(out)
-        out = self.ca(out) * out # Apply Coordinate Attention
+        out = self.ca(out)
 
         if self.downsample is not None:
             identity = self.downsample(x)
