@@ -1,10 +1,10 @@
 import sys
 import os
-
-src_path = ((os.path.abspath("src/")))
+src_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(src_path)
+print(src_path)
 
-from utils.train import train
+from utils import train
 import torch
 import os
 from dataloader.dataloader import load_data
@@ -21,7 +21,7 @@ if __name__ == "__main__":
     model = resnet50_ca().to(device)
     train_dataloader, test_dataloader = load_data(train_dir,
                                                    valid_dir,
-                                                   batch_size  = 16,
+                                                   batch_size  = 32,
                                                    transform=ResNet50_Weights.DEFAULT.transforms())
 
     train(model=model,
