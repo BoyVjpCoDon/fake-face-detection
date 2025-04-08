@@ -81,6 +81,3 @@ def resnet50_lka(**kwargs):
             param.requires_grad = False
     model.to(device="cuda" if torch.cuda.is_available() else "cpu")
     return model
-
-from torchinfo import summary
-print(summary(resnet50_lka(), input_size=(32,3, 224, 224), col_names=["input_size", "output_size", "num_params", "kernel_size", "mult_adds", "trainable"], row_settings=["var_names"], depth=4))
