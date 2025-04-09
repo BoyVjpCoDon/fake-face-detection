@@ -6,7 +6,7 @@ from utils.train import train
 import torch
 import os
 from dataloader.dataloader import load_data
-from src.model.Resnet50_MobileNetV2 import Resnet50_MobileNetV2
+from model.Resnet50_MobileNetV2 import Resnet50_MobileNetV2
 from torchvision.models import ResNet50_Weights
 
 if __name__ == "__main__":
@@ -19,7 +19,7 @@ if __name__ == "__main__":
     model = Resnet50_MobileNetV2().to(device)
     train_dataloader, test_dataloader = load_data(train_dir,
                                                    valid_dir,
-                                                   batch_size  = 32,
+                                                   batch_size  = 16,
                                                    transform=ResNet50_Weights.DEFAULT.transforms())
 
     train(model=model,

@@ -2,6 +2,12 @@ import torch
 import torch.nn as nn
 import torchvision.models as models
 import numpy as np
+
+import sys
+import os
+src_path = (os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(src_path)
+
 from Resnet50_CA import resnet50_ca
 # --- Coordinate Attention Module (giữ nguyên) ---
 class Resnet50_MobileNetV2(nn.Module):
