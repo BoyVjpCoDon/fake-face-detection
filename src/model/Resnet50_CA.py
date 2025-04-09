@@ -19,10 +19,6 @@ class h_swish(nn.Module):
 
     def forward(self, x):
         return x * self.sigmoid(x)
-
-class swish(nn.Module):
-    def forward(self, x):
-        return x * torch.sigmoid(x)
     
 class CoordAtt(nn.Module):
     def __init__(self, inp, oup, groups=32):
@@ -104,6 +100,6 @@ def resnet50_ca(**kwargs):
     model.load_state_dict(weight.get_state_dict(progress=True), strict=False)
     
     for name, param in model.named_parameters():
-        if name in weight.get_state_dict():
+        if name in weight.get_state_dict() and not("layer3" in name or "layer4" in name):
             param.requires_grad = False
     return model
